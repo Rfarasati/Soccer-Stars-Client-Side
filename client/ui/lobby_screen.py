@@ -5,7 +5,6 @@ from client.constants import WHITE, BLACK, BLUE, GREEN, GRAY, LIGHT_GRAY, RED, Y
 
 
 class LobbyScreen:
-    """Lobby screen - shows online users and handles invitations."""
 
     def __init__(self, screen: pygame.Surface, server_connection):
         self.screen = screen

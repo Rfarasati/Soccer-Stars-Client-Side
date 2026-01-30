@@ -8,7 +8,6 @@ from client.constants import HEARTBEAT_INTERVAL, HEARTBEAT_TIMEOUT, ACK_TIMEOUT,
 
 
 class P2PManager:
-    """UDP P2P manager for real-time game communication."""
 
     def __init__(self, local_port: int):
         self.local_port = local_port
@@ -47,7 +46,7 @@ class P2PManager:
 
     def start(self, game_session_id: str, username: str,
               opponent_ip: str, opponent_port: int) -> bool:
-        """Start the P2P connection."""
+
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.socket.bind(('', self.local_port))
@@ -83,7 +82,6 @@ class P2PManager:
             return False
 
     def stop(self) -> None:
-        """Stop the P2P connection."""
         self._running = False
         self.connected = False
         if self.socket:
@@ -94,13 +92,11 @@ class P2PManager:
             self.socket = None
 
     def _get_next_sequence(self) -> int:
-        """Get next sequence number."""
         with self._sequence_lock:
             self.send_sequence += 1
             return self.send_sequence
 
     def send(self, message: dict, require_ack: bool = False) -> bool:
-        """Send a message to the opponent."""
         if not self.connected or not self.socket:
             return False
 
@@ -128,7 +124,6 @@ class P2PManager:
             return False
 
     def register_handler(self, message_type: str, handler: Callable) -> None:
-        """Register a handler for a specific message type."""
         self.handlers[message_type] = handler
 
     def _receive_loop(self) -> None:
@@ -268,7 +263,6 @@ class P2PManager:
     # Convenience methods
 
     def send_handshake(self) -> bool:
-        """Send initial handshake."""
         return self.send({
             "type": "HANDSHAKE",
             "gameSessionId": self.game_session_id,
@@ -276,7 +270,6 @@ class P2PManager:
         }, require_ack=False)
 
     def send_handshake_ack(self, ready: bool = True) -> bool:
-        """Send handshake acknowledgment."""
         return self.send({
             "type": "HANDSHAKE_ACK",
             "gameSessionId": self.game_session_id,
@@ -285,7 +278,6 @@ class P2PManager:
         })
 
     def send_shot(self, piece_id: int, angle: float, power: float, turn_number: int) -> bool:
-        """Send a shot message."""
         return self.send({
             "type": "SHOT",
             "pieceId": piece_id,
@@ -295,7 +287,6 @@ class P2PManager:
         }, require_ack=True)
 
     def send_shot_ack(self, turn_number: int) -> bool:
-        """Send shot acknowledgment."""
         return self.send({
             "type": "SHOT_ACK",
             "turnNumber": turn_number,
@@ -303,7 +294,6 @@ class P2PManager:
         })
 
     def send_turn_end(self, turn_number: int, state_hash: str) -> bool:
-        """Send turn end message."""
         return self.send({
             "type": "TURN_END",
             "turnNumber": turn_number,
@@ -311,7 +301,6 @@ class P2PManager:
         }, require_ack=True)
 
     def send_turn_end_ack(self, turn_number: int, hash_match: bool) -> bool:
-        """Send turn end acknowledgment."""
         return self.send({
             "type": "TURN_END_ACK",
             "turnNumber": turn_number,
@@ -319,7 +308,6 @@ class P2PManager:
         })
 
     def send_goal_scored(self, blue_scored: bool, blue_score: int, red_score: int) -> bool:
-        """Send goal scored notification."""
         return self.send({
             "type": "GOAL_SCORED",
             "blueScored": blue_scored,
@@ -328,7 +316,6 @@ class P2PManager:
         })
 
     def send_game_over(self, winner_username: str, winner_score: int, loser_score: int) -> bool:
-        """Send game over message."""
         return self.send({
             "type": "GAME_OVER",
             "winnerUsername": winner_username,
@@ -337,38 +324,30 @@ class P2PManager:
         }, require_ack=True)
 
     def send_game_over_ack(self) -> bool:
-        """Send game over acknowledgment."""
         return self.send({"type": "GAME_OVER_ACK"})
 
     def send_state_request(self) -> bool:
-        """Request full state sync."""
         return self.send({"type": "STATE_REQUEST"})
 
     def send_state_sync(self, state_data: dict) -> bool:
-        """Send full state sync."""
         message = {"type": "STATE_SYNC"}
         message.update(state_data)
         return self.send(message)
 
     def send_heartbeat(self) -> bool:
-        """Send heartbeat."""
         return self.send({"type": "HEARTBEAT"})
 
     def send_heartbeat_ack(self) -> bool:
-        """Send heartbeat acknowledgment."""
         return self.send({"type": "HEARTBEAT_ACK"})
 
     def send_rematch_request(self) -> bool:
-        """Send rematch request."""
         return self.send({"type": "REMATCH_REQUEST"})
 
     def send_rematch_response(self, accepted: bool) -> bool:
-        """Send rematch response."""
         return self.send({
             "type": "REMATCH_RESPONSE",
             "accepted": accepted
         })
 
     def send_return_to_lobby(self) -> bool:
-        """Send return to lobby notification."""
         return self.send({"type": "RETURN_TO_LOBBY"})

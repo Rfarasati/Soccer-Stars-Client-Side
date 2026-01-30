@@ -3,7 +3,6 @@ from dataclasses import dataclass
 
 @dataclass
 class GameObject:
-    """Base class for all game objects (pieces and ball)."""
     x: float
     y: float
     radius: float

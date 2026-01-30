@@ -7,7 +7,6 @@ from client.constants import SERVER_HOST, SERVER_PORT
 
 
 class ServerConnection:
-    """TCP client for server communication."""
 
     def __init__(self):
         self.socket: Optional[socket.socket] = None
@@ -30,7 +29,6 @@ class ServerConnection:
         self._buffer = ""
 
     def connect(self, host: str = SERVER_HOST, port: int = SERVER_PORT) -> bool:
-        """Connect to the server."""
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.settimeout(10.0)
@@ -50,7 +48,6 @@ class ServerConnection:
             return False
 
     def disconnect(self) -> None:
-        """Disconnect from the server."""
         self._running = False
         if self.socket:
             try:
@@ -76,7 +73,6 @@ class ServerConnection:
             return False
 
     def register_handler(self, message_type: str, handler: Callable) -> None:
-        """Register a handler for a specific message type."""
         self.handlers[message_type] = handler
 
     def _receive_loop(self) -> None:
@@ -143,11 +139,9 @@ class ServerConnection:
     # Convenience methods for common operations
 
     def ping(self) -> bool:
-        """Send a PING message."""
         return self.send({"type": "PING"})
 
     def register(self, username: str, email: str, password: str) -> bool:
-        """Send a REGISTER_REQUEST."""
         return self.send({
             "type": "REGISTER_REQUEST",
             "username": username,
@@ -156,7 +150,6 @@ class ServerConnection:
         })
 
     def login(self, username: str, password: str) -> bool:
-        """Send a LOGIN_REQUEST."""
         return self.send({
             "type": "LOGIN_REQUEST",
             "username": username,
@@ -164,7 +157,6 @@ class ServerConnection:
         })
 
     def logout(self) -> bool:
-        """Send a LOGOUT_REQUEST."""
         if self.session_id:
             return self.send({
                 "type": "LOGOUT_REQUEST",
@@ -173,7 +165,6 @@ class ServerConnection:
         return False
 
     def get_online_users(self) -> bool:
-        """Request online users list."""
         if self.session_id:
             return self.send({
                 "type": "GET_ONLINE_USERS",
@@ -182,7 +173,6 @@ class ServerConnection:
         return False
 
     def invite_player(self, target_username: str, udp_port: int) -> bool:
-        """Send a game invite to another player."""
         if self.session_id:
             return self.send({
                 "type": "GAME_INVITE",
@@ -193,7 +183,6 @@ class ServerConnection:
         return False
 
     def respond_to_invite(self, invite_id: str, accepted: bool, udp_port: int) -> bool:
-        """Respond to a game invite."""
         return self.send({
             "type": "GAME_INVITE_RESPONSE",
             "inviteId": invite_id,
@@ -203,7 +192,6 @@ class ServerConnection:
 
     def report_game_result(self, game_session_id: str, winner_username: str,
                            winner_score: int, loser_score: int) -> bool:
-        """Report the game result to the server."""
         if self.session_id:
             return self.send({
                 "type": "GAME_RESULT",

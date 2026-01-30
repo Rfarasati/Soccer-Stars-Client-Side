@@ -9,7 +9,6 @@ from client.game.game_engine import PhysicsEngine
 
 
 class GameState:
-    """Manages the complete game state."""
 
     def __init__(self):
         self.blue_pieces = []
@@ -37,7 +36,6 @@ class GameState:
 
     def initialize(self, game_session_id: str, my_username: str,
                    opponent_username: str, is_initiator: bool) -> None:
-        """Initialize a new game."""
         self.game_session_id = game_session_id
         self.my_username = my_username
         self.opponent_username = opponent_username
@@ -53,14 +51,12 @@ class GameState:
         self._reset_positions()
 
     def _reset_positions(self) -> None:
-        """Reset all pieces and ball to initial positions."""
         self.blue_pieces = create_pieces("blue", BLUE_POSITIONS, PIECE_RADIUS)
         self.red_pieces = create_pieces("red", RED_POSITIONS, PIECE_RADIUS)
         self.ball = create_ball(BALL_POSITION, BALL_RADIUS)
         self.physics = PhysicsEngine(self.blue_pieces, self.red_pieces, self.ball)
 
     def is_my_turn(self) -> bool:
-        """Check if it's my turn."""
         if self.game_over:
             return False
         if self.is_blue:
@@ -69,34 +65,27 @@ class GameState:
             return not self.is_blues_turn
 
     def get_my_pieces(self) -> list:
-        """Get my pieces."""
         return self.blue_pieces if self.is_blue else self.red_pieces
 
     def get_opponent_pieces(self) -> list:
-        """Get opponent's pieces."""
         return self.red_pieces if self.is_blue else self.blue_pieces
 
     def get_my_team(self) -> str:
-        """Get my team name."""
         return "blue" if self.is_blue else "red"
 
     def apply_shot(self, piece_id: int, angle: float, power: float) -> bool:
-        """Apply a shot. Returns True if valid."""
         team = "blue" if self.is_blues_turn else "red"
         return self.physics.apply_shot(team, piece_id, angle, power)
 
     def update_physics(self) -> Optional[str]:
-        """Update physics for one frame. Returns goal event or None."""
         if self.game_over:
             return None
         return self.physics.update()
 
     def is_physics_running(self) -> bool:
-        """Check if physics simulation is still running."""
         return not self.physics.is_all_stopped()
 
     def handle_goal(self, blue_scored: bool) -> None:
-        """Handle a goal being scored."""
         if blue_scored:
             self.blue_score += 1
         else:
@@ -115,19 +104,16 @@ class GameState:
             self._reset_positions()
 
     def end_turn(self) -> None:
-        """End the current turn and switch to next player."""
         self.is_blues_turn = not self.is_blues_turn
         self.current_turn += 1
 
     def compute_state_hash(self) -> str:
-        """Compute a hash of the current game state for sync verification."""
         state = ""
         for piece in self.blue_pieces + self.red_pieces + [self.ball]:
             state += f"{round(piece.x, 1)},{round(piece.y, 1)};"
         return hashlib.md5(state.encode()).hexdigest()[:8]
 
     def to_sync_dict(self) -> dict:
-        """Convert current state to dictionary for STATE_SYNC message."""
         return {
             "bluePieces": [p.to_dict() for p in self.blue_pieces],
             "redPieces": [p.to_dict() for p in self.red_pieces],
@@ -172,28 +158,24 @@ class GameState:
         self.is_blues_turn = data.get("isBluesTurn", self.is_blues_turn)
 
     def _lerp_object(self, obj, target: dict, factor: float) -> None:
-        """Linearly interpolate object towards target state."""
         obj.x += (target["x"] - obj.x) * factor
         obj.y += (target["y"] - obj.y) * factor
         obj.vx = target.get("vx", 0.0)
         obj.vy = target.get("vy", 0.0)
 
     def get_winner_score(self) -> int:
-        """Get winner's score."""
         if self.winner_username == self.my_username:
             return self.blue_score if self.is_blue else self.red_score
         else:
             return self.red_score if self.is_blue else self.blue_score
 
     def get_loser_score(self) -> int:
-        """Get loser's score."""
         if self.winner_username == self.my_username:
             return self.red_score if self.is_blue else self.blue_score
         else:
             return self.blue_score if self.is_blue else self.red_score
 
     def reset_for_rematch(self) -> None:
-        """Reset state for a rematch (swap sides)."""
         self.is_blue = not self.is_blue  # Swap sides
         self.blue_score = 0
         self.red_score = 0

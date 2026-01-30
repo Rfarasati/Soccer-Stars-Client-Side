@@ -8,7 +8,6 @@ from client.game.entities import Piece, Ball, GameObject
 
 
 class PhysicsEngine:
-    """Deterministic physics engine for Soccer Stars."""
 
     def __init__(self, blue_pieces: List[Piece], red_pieces: List[Piece], ball: Ball):
         self.blue_pieces = blue_pieces
@@ -16,14 +15,9 @@ class PhysicsEngine:
         self.ball = ball
 
     def get_all_objects(self) -> List[GameObject]:
-        """Get all game objects."""
         return self.blue_pieces + self.red_pieces + [self.ball]
 
     def update(self) -> Optional[str]:
-        """
-        Update physics for one frame.
-        Returns 'blue_scored', 'red_scored', or None.
-        """
         # Update positions and apply friction
         for obj in self.get_all_objects():
             # Apply velocity
@@ -60,7 +54,6 @@ class PhysicsEngine:
         return self._check_goal()
 
     def _resolve_collision(self, obj1: GameObject, obj2: GameObject) -> None:
-        """Resolve collision between two circular objects."""
         dx = obj2.x - obj1.x
         dy = obj2.y - obj1.y
         distance = math.sqrt(dx * dx + dy * dy)
@@ -100,7 +93,6 @@ class PhysicsEngine:
             obj2.y += (overlap / 2 + 0.1) * ny
 
     def _check_wall_collision(self, obj: GameObject) -> None:
-        """Check and resolve wall collisions."""
         # Left wall (but not in goal area for ball)
         if obj.x - obj.radius < 0:
             if obj is not self.ball or not (GOAL_TOP < obj.y < GOAL_BOTTOM):
@@ -124,7 +116,6 @@ class PhysicsEngine:
             obj.vy = -obj.vy * RESTITUTION
 
     def _check_goal(self) -> Optional[str]:
-        """Check if a goal was scored."""
         # Blue scores (ball enters right goal)
         if self.ball.x > FIELD_WIDTH and GOAL_TOP < self.ball.y < GOAL_BOTTOM:
             return "blue_scored"
@@ -136,14 +127,12 @@ class PhysicsEngine:
         return None
 
     def is_all_stopped(self) -> bool:
-        """Check if all objects have stopped moving."""
         for obj in self.get_all_objects():
             if obj.is_moving(MIN_VELOCITY):
                 return False
         return True
 
     def apply_shot(self, team: str, piece_id: int, angle: float, power: float) -> bool:
-        """Apply a shot to a piece. Returns True if valid shot."""
         pieces = self.blue_pieces if team == "blue" else self.red_pieces
         if 0 <= piece_id < len(pieces):
             pieces[piece_id].apply_shot(angle, power)

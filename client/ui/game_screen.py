@@ -4,13 +4,11 @@ import time
 from typing import Optional, Tuple
 from client.game import GameState
 from client.constants import (
-    FIELD_WIDTH, FIELD_HEIGHT, GOAL_TOP, GOAL_BOTTOM, GOAL_WIDTH, GOAL_HEIGHT,
-    WHITE, BLACK, BLUE, RED, GREEN, DARK_GREEN, GRAY, YELLOW, LIGHT_GRAY,
-    PIECE_RADIUS, BALL_RADIUS, SHOT_POWER
+    FIELD_WIDTH, FIELD_HEIGHT, GOAL_TOP, GOAL_WIDTH, GOAL_HEIGHT,
+    WHITE, BLACK, BLUE, RED, GREEN, GRAY, YELLOW, SHOT_POWER
 )
 
 class GameScreen:
-    """Main game screen with field rendering and shot mechanics."""
 
     def __init__(self, screen: pygame.Surface, game_state: GameState,
                  server_connection, p2p_manager):
@@ -66,7 +64,6 @@ class GameScreen:
         self.return_to_lobby = False
 
     def start_game(self, game_data: dict) -> None:
-        """Initialize for a new game."""
         self.game_state.initialize(
             game_session_id=game_data["gameSessionId"],
             my_username=self.server.username,
@@ -106,7 +103,6 @@ class GameScreen:
         self.handshake_sent = True
 
     def _register_p2p_handlers(self) -> None:
-        """Register P2P message handlers."""
         self.p2p.register_handler("HANDSHAKE", self._on_handshake)
         self.p2p.register_handler("HANDSHAKE_ACK", self._on_handshake_ack)
         self.p2p.register_handler("SHOT", self._on_shot)
@@ -121,19 +117,16 @@ class GameScreen:
         self.p2p.register_handler("RETURN_TO_LOBBY", self._on_return_to_lobby)
 
     def _on_handshake(self, message: dict) -> None:
-        """Handle handshake from opponent."""
         self.handshake_received = True
         self.p2p.send_handshake_ack(ready=True)
         if self.handshake_sent:
             self.game_ready = True
 
     def _on_handshake_ack(self, message: dict) -> None:
-        """Handle handshake acknowledgment."""
         self.handshake_received = True
         self.game_ready = True
 
     def _on_shot(self, message: dict) -> None:
-        """Handle opponent's shot."""
         if self.game_state.is_my_turn():
             # Ignore if it's my turn
             return
@@ -155,7 +148,6 @@ class GameScreen:
         self.p2p.send_shot_ack(turn_number)
 
     def _on_turn_end(self, message: dict) -> None:
-        """Handle turn end from opponent."""
         turn_number = message.get("turnNumber", 0)
         state_hash = message.get("stateHash", "")
 
@@ -173,7 +165,6 @@ class GameScreen:
             self.p2p.send_state_request()
 
     def _on_goal_scored(self, message: dict) -> None:
-        """Handle goal scored notification from opponent."""
         blue_scored = message.get("blueScored", False)
 
         # Set scores directly from message (authoritative)
@@ -212,7 +203,6 @@ class GameScreen:
         self.goal_animation_time = time.time()
 
     def _on_game_over(self, message: dict) -> None:
-        """Handle game over notification."""
         self.game_state.winner_username = message.get("winnerUsername")
         self.game_state.game_over = True
         self.show_game_over = True
@@ -229,37 +219,30 @@ class GameScreen:
         )
 
     def _on_state_sync(self, message: dict) -> None:
-        """Handle state sync from opponent."""
         self.game_state.apply_sync(message, smooth=True)
 
     def _on_state_request(self, message: dict) -> None:
-        """Handle state sync request."""
         self.p2p.send_state_sync(self.game_state.to_sync_dict())
 
     def _on_heartbeat(self, message: dict) -> None:
-        """Handle heartbeat."""
         self.p2p.send_heartbeat_ack()
 
     def _on_rematch_request(self, message: dict) -> None:
-        """Handle rematch request from opponent."""
         self.opponent_wants_rematch = True
         if self.rematch_requested:
             # Both want rematch - start new game
             self._start_rematch()
 
     def _on_rematch_response(self, message: dict) -> None:
-        """Handle rematch response."""
         if message.get("accepted"):
             self._start_rematch()
         else:
             self.return_to_lobby = True
 
     def _on_return_to_lobby(self, message: dict) -> None:
-        """Handle opponent returning to lobby."""
         self.return_to_lobby = True
 
     def _start_rematch(self) -> None:
-        """Start a rematch."""
         self.game_state.reset_for_rematch()
         self.selected_piece_id = None
         self.aiming = False
@@ -273,21 +256,18 @@ class GameScreen:
         self.goal_animation_time = None
 
     def _screen_to_field(self, screen_pos: Tuple[int, int]) -> Tuple[float, float]:
-        """Convert screen coordinates to field coordinates."""
         return (
             screen_pos[0] - self.field_offset_x,
             screen_pos[1] - self.field_offset_y
         )
 
     def _field_to_screen(self, field_pos: Tuple[float, float]) -> Tuple[int, int]:
-        """Convert field coordinates to screen coordinates."""
         return (
             int(field_pos[0] + self.field_offset_x),
             int(field_pos[1] + self.field_offset_y)
         )
 
     def _get_piece_at(self, field_x: float, field_y: float) -> Optional[int]:
-        """Get piece ID at field position, or None."""
         if not self.game_state.is_my_turn():
             return None
 
@@ -300,7 +280,6 @@ class GameScreen:
         return None
 
     def _execute_shot(self) -> None:
-        """Execute the current shot."""
         if self.selected_piece_id is None or not self.aim_start or not self.aim_current:
             return
 
