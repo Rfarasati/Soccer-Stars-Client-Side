@@ -8,6 +8,16 @@ mobile game). Built with Pygame. Talks to a central server
 ([Soccer-Stars-Server-Side](https://github.com/Rfarasati/Soccer-Stars-Server-Side)) for
 accounts and matchmaking, then plays the match directly peer-to-peer with the opponent.
 
+## Screenshots
+
+| Lobby | Game invitation | Match in progress |
+|---|---|---|
+| ![Lobby](docs/lobby.png) | ![Game invitation](docs/game-invitation.png) | ![Gameplay](docs/gameplay.png) |
+
+Two players (`negar`, `reza`) logged in, one inviting the other to a match, then playing —
+each controlling 5 pieces (blue/red) around a shared ball, peer-to-peer once the match
+starts.
+
 ## How it works
 
 - **`network/server_connection.py`** — TCP connection to the matchmaking server: login,
@@ -43,8 +53,11 @@ server connection, UDP for P2P gameplay) and `json`/`threading`.
 
 ```bash
 pip install pygame
-python -m client.main
+python client/main.py
 ```
+
+(run from the repo root — `main.py` adds the repo root to `sys.path` itself so the
+`client` package resolves; there is no `client/main` module to run with `python -m`.)
 
 Requires a running instance of the [server](https://github.com/Rfarasati/Soccer-Stars-Server-Side)
 (`SERVER_HOST` / `SERVER_PORT` in `client/constants.py`, default `localhost:5001`), and two
