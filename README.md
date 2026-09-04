@@ -1,6 +1,6 @@
 # Soccer Stars — Client
 
-> **Course project** — Computer Networks, Ferdowsi University of Mashhad, Fall 2025 (Final)
+> **Course project** — Computer Networks, Ferdowsi University of Mashhad, Fall 2025 (5th semester - Final)
 
 The game client for **Soccer Stars**, a real-time online 2-player physics game (flick your
 pieces to hit the ball into the opponent's goal — think table football / "Soccer Stars"
